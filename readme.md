@@ -11,9 +11,9 @@ service Invoicer {
     rpc Create(CreateRequest) returns (CreateResponse);
 }
 ```
-The service which we are implementing on a business level is a invoice generator. Client passes some information to fill up the invoice and server returns byte files. 
+The service which we are implementing on a business level is an invoice generator. Client passes some information to fill up the invoice and server returns byte files. 
 
-Here on protobuf code you can see that service `Invoicer` has a method/procedure `Create`. This method takes some args and return some values. Here both of these we call messages as this is all remote and we define The Protocol.
+Here, on the protobuf code you can see that service `Invoicer` has a method/procedure `Create`. This method takes some args and return some values. Herein, both of these we call "messages" as this is all remote and we define The Protocol.
 ```protobuf
 message Amount {
     int64 amount = 1;
@@ -116,5 +116,14 @@ Here you have five steps:
 1. Open a new tcp listener from OS, later you will use it as a gRPC server
 2. Create object that handles all common gGRPC logic of the server. As for now its blank gRPC server. Has no `service` (the on from .proto file) registered and does not accepts incoming tcp connections
 3. Create instance of your business logic Server/Handler
-4. User protoc-gen generated method to combine the two above with .proto definition
+4. User protoc-gen generated method to combine the two above with .proto definition. Here we are marrying these 3 things together.
 5. Arm your gRPC Server with tco listener
+
+# How to test it
+
+In order to test gRPC Server you need a gRPC Client. Fortunately Postman offers one :smile:.
+In order for client to understand your API you need to provide it with `.proto` file. 
+You have several methods for that. Event the URI for web file will work.
+
+![](readme/img/1.png)
+

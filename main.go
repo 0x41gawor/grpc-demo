@@ -11,7 +11,7 @@ import (
 func main() {
 	lis, err := net.Listen("tcp", ":8089")
 	if err != nil {
-		log.Fatalf("Cannot start a listner: %s", err)
+		log.Fatalf("Cannot start a listener: %s", err)
 	}
 	grpcServer := grpc.NewServer()
 	service := &MyInvoicerServer{}
