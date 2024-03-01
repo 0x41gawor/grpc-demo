@@ -45,3 +45,20 @@ export PATH=$PATH:$(go env GOPATH)/bin
 # to create go code in current dir
 protoc greet.proto --go_out=$(pwd)
 ```
+
+But the snippet above will generate only the messages data structs as this is the base protobuf fucntionality.
+
+The generation of code needed to implement a gRPC server lies on the responsibility of `protoc-gen-go-grpc` plugin.
+Use the code below then:
+```sh
+sudo apt install protobuf-complier
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+export PATH=$PATH:$(go env GOPATH)/bin
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+export PATH=$PATH:$(go env GOPATH)/bin
+protoc --go_out=invoicer --go_opt=paths=source_relative --go-grpc_out=invoicer --go-grpc_opt=paths=source_relative invoicer.proto
+```
+
+After issuing this command we have two files in `invoicer/` dir:
+- `invoicer_grpc.pb.go` - for implementation of gRPC server
+- `invoicer.pb.go` - simple protobuf data structs
