@@ -62,3 +62,59 @@ protoc --go_out=invoicer --go_opt=paths=source_relative --go-grpc_out=invoicer -
 After issuing this command we have two files in `invoicer/` dir:
 - `invoicer_grpc.pb.go` - for implementation of gRPC server
 - `invoicer.pb.go` - simple protobuf data structs
+
+
+# Implementation of gRPC server
+First thing you need to do is to implement the interface created in `invoicer_grpc.pb.go`
+```golang
+// InvoicerServer is the server API for Invoicer service.
+// All implementations must embed UnimplementedInvoicerServer
+// for forward compatibility
+type InvoicerServer interface {
+	Create(context.Context, *CreateRequest) (*CreateResponse, error)
+	mustEmbedUnimplementedInvoicerServer()
+}
+```
+
+This is where your business logic lies:
+
+```golang
+type MyInvoicerServer struct {
+	invoicer.UnimplementedInvoicerServer
+}
+
+func (s MyInvoicerServer) Create(c context.Context, r *invoicer.CreateRequest) (*invoicer.CreateResponse, error) {
+	return &invoicer.CreateResponse{
+		Pdf:  []byte(fmt.Sprintf("test %s", r.Amount)),
+		Docx: []byte(fmt.Sprintf("test %s", r.From)),
+	}, nil
+}
+```
+
+When you've done it you can enter the main.go file:
+```golang
+func main() {
+    # 1
+	lis, err := net.Listen("tcp", ":8089")
+	if err != nil {
+		log.Fatalf("Cannot start a listner: %s", err)
+	}
+    # 2
+	grpcServer := grpc.NewServer()
+    # 3
+	service := &MyInvoicerServer{}
+    # 4
+	invoicer.RegisterInvoicerServer(grpcServer, service)
+    # 5
+	err = grpcServer.Serve(lis)
+	if err != nil {
+		log.Fatalf("Impossible to serve: %s", err)
+	}
+}
+```
+Here you have five steps:
+1. Open a new tcp listener from OS, later you will use it as a gRPC server
+2. Create object that handles all common gGRPC logic of the server. As for now its blank gRPC server. Has no `service` (the on from .proto file) registered and does not accepts incoming tcp connections
+3. Create instance of your business logic Server/Handler
+4. User protoc-gen generated method to combine the two above with .proto definition
+5. Arm your gRPC Server with tco listener
